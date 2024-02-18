@@ -1,0 +1,35 @@
+{
+  "name": "spc-data-reader",
+  "private": true,
+  "version": "0.0.0",
+  "author": "PNZDEV",
+  "license": "MIT",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "build": "nuxt build",
+    "build-electron": "nuxt build --prerender && electron-builder",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@amcharts/amcharts5": "^5.8.2",
+    "nuxt": "^3.10.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "vue": "^3.4.15",
+    "vue-google-charts": "^1.1.0",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "electron": "^28.2.3",
+    "electron-builder": "^24.9.1",
+    "naive-ui": "^2.37.3",
+    "nuxt-electron": "^0.7.0",
+    "sass": "^1.71.0",
+    "vfonts": "^0.0.3",
+    "vite-plugin-electron": "^0.28.2",
+    "vite-plugin-electron-renderer": "^0.14.5"
+  }
+}
