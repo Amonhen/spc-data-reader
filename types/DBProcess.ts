@@ -96,9 +96,8 @@ export default class DBProcess {
 
     public static saveAppData(name:string,content:any) {
         //const appDataDirPath = DBProcess.getAppDataPath();
-
-        const appDataDirPath: string =   electron.app.getPath('userData')
-
+        const appDataDirPath: string = process.env['APP_DATA']
+        console.log(appDataDirPath)
         // Create appDataDir if not exist
         if (!existsSync(appDataDirPath)) {
             mkdirSync(appDataDirPath);
