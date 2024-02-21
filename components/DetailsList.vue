@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   rows: object[],
-  columns: {field:string,label:string}[]
+  columns: {field:string,label:string, format?: (value:any) => string}[]
 }>()
 </script>
 
@@ -15,7 +15,12 @@ const props = defineProps<{
     <tbody>
       <tr v-for="(row,rowIndex) of rows" :key="rowIndex">
         <td v-for="(column,colIndex) of columns" :key="colIndex">
-          {{row[column.field]}}
+          <template v-if="column.format">
+            {{column.format(row[column.field])}}
+          </template>
+          <template v-else>
+            {{row[column.field]}}
+          </template>
         </td>
       </tr>
     </tbody>

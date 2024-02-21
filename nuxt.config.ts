@@ -27,5 +27,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
 
-  }
+  },
+  router: {
+    options: {
+      hashMode: true,
+    },
+  },
 })

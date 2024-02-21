@@ -1,3 +1,4 @@
+import moment from "moment";
 import type {Buffer} from "node:buffer";
 
 export interface DataBaseRecord {
@@ -9,7 +10,7 @@ export interface DataBaseRecord {
 }
 
 export interface DataBaseRecordMapped {
-    time: string
+    time: number
     header: string
     valueMin: number
     valueMax: number
@@ -23,7 +24,7 @@ export interface MinAndMaxValue {
 export interface MinAndMaxAverageValue {
     min: number
     max: number
-    time: string
+    time: number
     average: number
 }
 
@@ -38,7 +39,7 @@ export interface MeasureRecord {
 }
 
 export interface TableData {
-    time: string
+    time: moment.Moment
     channel: string
     machine: string
     average: number

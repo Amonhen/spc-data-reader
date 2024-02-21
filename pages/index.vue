@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
+import moment from "moment";
 import {NUpload,NSelect,NDatePicker} from 'naive-ui'
 import type {UploadInst,UploadFileInfo} from 'naive-ui'
 import type {ChartData, Measurement, TableData} from "~/types/interfaces"
@@ -11,8 +12,8 @@ const tabItems = ref<{label:string,content:string}[]>([
   { label: "Table", content: "" },
   { label: "Chart", content: "" }
 ])
-let columns = ref<{ field: string, label: string }[]>([
-  { field: "time", label: "Date" },
+let columns = ref<{ field: string, label: string, format?: (value:any) => string  }[]>([
+  { field: "time", label: "Date", format: (value:moment.Moment) => value.format('DD.MM.YYYY HH:MM:SS') },
   { field: "channel", label: "Channel" },
   { field: "machine", label: "Machine" },
   { field: "average", label: "Average" },
@@ -21,7 +22,7 @@ let columns = ref<{ field: string, label: string }[]>([
 let selection = reactive({
   machine: "",
   channel: "",
-  date: [1183135260000, Date.now()] as number[],
+  date: [1183135260000, Date.now()] as [number,number],
   operation: ""
 })
 
@@ -63,10 +64,14 @@ async function onFileChanged(fileEvent: { fileList: UploadFileInfo[] }) {
         recordIndex === 0 && (selection.channel = record.channel)
         recordIndex === 0 && (selection.operation= record.operation)
         Object.keys(record.data).forEach((machineName:string,machineIndex:number) => {
-          machineIndex === 0 && (selection.machine = machineName)
-          record.data[machineName].forEach((machineRecord) => {
+          machineIndex === 0 && recordIndex === 0 && (selection.machine = machineName)
+          record.data[machineName].forEach((machineRecord,machineRecordIndex) => {
+            let time = moment(machineRecord.time)
+            if (recordIndex === 0 && machineIndex === 0 && machineRecordIndex === 0) {
+              selection.date[0] = machineRecord.time
+            }
             tableData.value.push({
-              time: machineRecord.time,
+              time: time,
               channel: record.channel,
               machine: machineName,
               average: machineRecord.average,

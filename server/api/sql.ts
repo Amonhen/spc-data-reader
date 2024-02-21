@@ -25,7 +25,8 @@ export default defineEventHandler(async (request) => {
       let dataBaseRecordsMapped: DataBaseRecordMapped[] = dataBaseRecords.map<DataBaseRecordMapped>( (record: DataBaseRecord) => {
          let date: moment.Moment = moment(record["time@timestamp"] * 1000)
             return {
-              time: date.format('DD.MM.YYYY HH:mm:ss'),
+            time: record["time@timestamp"] * 1000,
+             // time: date.format('DD.MM.YYYY HH:mm:ss'),
               header: record.data_format_0.toString(),
               valueMin: record.data_format_1,
               valueMax: record.data_format_2,
