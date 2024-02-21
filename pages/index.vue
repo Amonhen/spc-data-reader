@@ -6,6 +6,9 @@ import type {UploadInst,UploadFileInfo} from 'naive-ui'
 import type {ChartData, Measurement, TableData} from "~/types/interfaces"
 import DBProcess from "~/types/DBProcess";
 
+//const appDataDirPath: string = app.getPath('userData')
+
+//console.log(appDataDirPath)
 
 let tableData = ref<TableData[]>([])
 const uploadElement = ref<UploadInst | null>(null)
@@ -55,6 +58,7 @@ let chartData = computed<ChartData>(() => {
 })
 
 async function onFileChanged(fileEvent: { fileList: UploadFileInfo[] }) {
+  console.log(fileEvent)
   if (fileEvent.fileList.length) {
     let data = await DBProcess.process(fileEvent.fileList[0].file!)
    // let formData = new FormData

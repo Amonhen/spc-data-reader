@@ -7,7 +7,7 @@ import type {DataBaseRecord, DataBaseRecordMapped, Measurement, MeasureRecord} f
 import moment from "moment/moment";
 import {MeasureRecord as MeasureRecordObject} from "~/types/MeasureRecord";
 import path from 'path'
-import * as electron from "electron";
+import { ipcRenderer } from "electron";
 
 export default class DBProcess {
     public static async process(file: File): Promise<Measurement> {
@@ -17,7 +17,7 @@ export default class DBProcess {
 
 
             //await writeFile(`${fileName}`, fileData)
-        let path = DBProcess.saveAppData(fileName,fileData)
+        let path = await DBProcess.saveAppData(fileName,fileData)
             const db = await open({
                 filename: path,
                 driver: sqlite3.Database
@@ -72,32 +72,32 @@ export default class DBProcess {
             })
             return measurement
     }
+    //
+    // public static getAppDataPath() {
+    //     switch (process.platform) {
+    //         case "darwin": {
+    //             // @ts-ignore
+    //             return path.join(process.env.HOME, "Library", "Application Support", "spc-data-reader");
+    //         }
+    //         case "win32": {
+    //             // @ts-ignore
+    //             return path.join(process.env.APPDATA, "spc-data-reader");
+    //         }
+    //         case "linux": {
+    //             // @ts-ignore
+    //             return path.join(process.env.HOME, ".spc-data-reader");
+    //         }
+    //         default: {
+    //             console.log("Unsupported platform!");
+    //             process.exit(1);
+    //         }
+    //     }
+    // }
 
-    public static getAppDataPath() {
-        switch (process.platform) {
-            case "darwin": {
-                // @ts-ignore
-                return path.join(process.env.HOME, "Library", "Application Support", "spc-data-reader");
-            }
-            case "win32": {
-                // @ts-ignore
-                return path.join(process.env.APPDATA, "spc-data-reader");
-            }
-            case "linux": {
-                // @ts-ignore
-                return path.join(process.env.HOME, ".spc-data-reader");
-            }
-            default: {
-                console.log("Unsupported platform!");
-                process.exit(1);
-            }
-        }
-    }
+    public static async saveAppData(name:string,content:any) {
+       // const appDataDirPath = DBProcess.getAppDataPath();
+        const appDataDirPath: string = await ipcRenderer.invoke('getUserDataPath')
 
-    public static saveAppData(name:string,content:any) {
-        //const appDataDirPath = DBProcess.getAppDataPath();
-        const appDataDirPath: string = process.env['APP_DATA']
-        console.log(appDataDirPath)
         // Create appDataDir if not exist
         if (!existsSync(appDataDirPath)) {
             mkdirSync(appDataDirPath);
@@ -114,7 +114,7 @@ export default class DBProcess {
                 console.log("Data saved correctly!");
             }
         });
-        console.log(appDataFilePath)
-        return appDataFilePath;
+        //console.log(appDataFilePath)
+        return Promise.resolve(appDataFilePath)
     }
 }

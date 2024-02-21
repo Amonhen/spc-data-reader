@@ -1,6 +1,5 @@
 import path from 'path'
-import { app, BrowserWindow } from 'electron'
-import electron from "electron";
+import { app, BrowserWindow, ipcMain } from 'electron'
 
 // The built directory structure
 //
@@ -23,22 +22,16 @@ let win: BrowserWindow
 const preload = path.join(process.env.DIST, 'preload.js')
 
 async function bootstrap() {
-   const appDataDirPath: string = (electron.app || electron.remote.app).getPath('userData')
-   console.log(appDataDirPath)
-   process.env['APP_DATA'] = appDataDirPath
    win = new BrowserWindow({
       title: "SPC Data",
       webPreferences: {
          preload,
-         nodeIntegrationInWorker: true,
+        // nodeIntegrationInWorker: true,
          contextIsolation: false,
          nodeIntegration: true,
          webSecurity: false,
       },
    })
-
-
-
    if (process.env.VITE_DEV_SERVER_URL) {
      await win.loadURL(process.env.VITE_DEV_SERVER_URL)
      win.webContents.openDevTools()
@@ -46,6 +39,11 @@ async function bootstrap() {
      await win.loadFile(path.join(process.env.VITE_PUBLIC!, 'index.html'))
    }
 }
+
+ipcMain.handle('getUserDataPath', async (event, ...args) => {
+   const appDataDirPath: string = app.getPath('userData')
+   return Promise.resolve(appDataDirPath)
+})
 
 app.whenReady()
     .then(bootstrap)
