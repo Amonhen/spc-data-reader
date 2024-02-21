@@ -1,18 +1,22 @@
 import {Buffer} from "node:buffer";
-import {writeFile} from "node:fs/promises";
+// import {writeFile} from "node:fs/promises";
+import {mkdirSync,existsSync,writeFile} from "node:fs";
 import {open} from "sqlite";
 import sqlite3 from "sqlite3";
 import type {DataBaseRecord, DataBaseRecordMapped, Measurement, MeasureRecord} from "~/types/interfaces";
 import moment from "moment/moment";
 import {MeasureRecord as MeasureRecordObject} from "~/types/MeasureRecord";
+import path from 'path'
 
 export default class DBProcess {
     public static async process(file: File): Promise<Measurement> {
             const fileData: Uint8Array = new Uint8Array(Buffer.from(await file.arrayBuffer()));
             const fileName: string = file.name
-            await writeFile(`${fileName}`, fileData)
+
+            //await writeFile(`${fileName}`, fileData)
+        let path = DBProcess.saveAppData(fileName,fileData)
             const db = await open({
-                filename: `uploads/${fileName}`,
+                filename: path,
                 driver: sqlite3.Database
             })
             let dataBaseRecords: DataBaseRecord[] = await db.all('SELECT * FROM data')
@@ -64,5 +68,49 @@ export default class DBProcess {
                 }
             })
             return measurement
+    }
+
+    public static getAppDataPath() {
+        switch (process.platform) {
+            case "darwin": {
+                // @ts-ignore
+                return path.join(process.env.HOME, "Library", "Application Support", "Your app name");
+            }
+            case "win32": {
+                // @ts-ignore
+                return path.join(process.env.APPDATA, "Your app name");
+            }
+            case "linux": {
+                // @ts-ignore
+                return path.join(process.env.HOME, ".Your app name");
+            }
+            default: {
+                console.log("Unsupported platform!");
+                process.exit(1);
+            }
+        }
+    }
+
+    public static saveAppData(name:string,content:any) {
+        const appDataDirPath = DBProcess.getAppDataPath();
+
+        // Create appDataDir if not exist
+        if (!existsSync(appDataDirPath)) {
+            mkdirSync(appDataDirPath);
+        }
+
+        const appDataFilePath = path.join(appDataDirPath, name);
+        //content = JSON.stringify(content);
+
+        writeFile(appDataFilePath, content, (err:any) => {
+            if (err) {
+                console.log("There was a problem saving data!");
+                // console.log(err);
+            } else {
+                console.log("Data saved correctly!");
+            }
+        });
+
+        return appDataFilePath;
     }
 }
