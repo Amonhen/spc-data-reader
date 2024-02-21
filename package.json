@@ -13,6 +13,9 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
+  "extraResources": [
+    ".output/server/**"
+  ],
   "dependencies": {
     "@amcharts/amcharts5": "^5.8.2",
     "moment": "^2.30.1",

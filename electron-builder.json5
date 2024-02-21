@@ -7,6 +7,9 @@
   "directories": {
     "output": "release/${version}"
   },
+  "extraResources": [
+    ".output/server/**"
+  ],
   "files": [
     ".output/**/*",
     "dist-electron"
@@ -18,20 +21,13 @@
     ]
   },
   "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
-    ],
+    "target": "portable",
     "artifactName": "${productName}_${version}.${ext}"
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
+    "deleteAppDataOnUninstall": true
   }
 }

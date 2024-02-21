@@ -9,6 +9,7 @@ export default defineNuxtConfig({
       'nuxt-electron'
   ],
   electron: {
+    //disableDefaultOptions: true,
     build: [
       {
         // Main-Process entry file of the Electron App.
@@ -23,7 +24,11 @@ export default defineNuxtConfig({
         },
       },
     ],
-    renderer: {},
+    renderer: {
+      resolve: {
+        sqlite3: { type: 'cjs' },
+      },
+    },
   },
   runtimeConfig: {
 
