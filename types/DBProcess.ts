@@ -74,15 +74,15 @@ export default class DBProcess {
         switch (process.platform) {
             case "darwin": {
                 // @ts-ignore
-                return path.join(process.env.HOME, "Library", "Application Support", "Your app name");
+                return path.join(process.env.HOME, "Library", "Application Support", "spc-data-reader");
             }
             case "win32": {
                 // @ts-ignore
-                return path.join(process.env.APPDATA, "Your app name");
+                return path.join(process.env.APPDATA, "spc-data-reader");
             }
             case "linux": {
                 // @ts-ignore
-                return path.join(process.env.HOME, ".Your app name");
+                return path.join(process.env.HOME, ".spc-data-reader");
             }
             default: {
                 console.log("Unsupported platform!");
@@ -110,7 +110,7 @@ export default class DBProcess {
                 console.log("Data saved correctly!");
             }
         });
-
+        console.log(appDataFilePath)
         return appDataFilePath;
     }
 }
