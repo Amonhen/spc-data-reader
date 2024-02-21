@@ -7,11 +7,14 @@ import type {DataBaseRecord, DataBaseRecordMapped, Measurement, MeasureRecord} f
 import moment from "moment/moment";
 import {MeasureRecord as MeasureRecordObject} from "~/types/MeasureRecord";
 import path from 'path'
+import * as electron from "electron";
 
 export default class DBProcess {
     public static async process(file: File): Promise<Measurement> {
             const fileData: Uint8Array = new Uint8Array(Buffer.from(await file.arrayBuffer()));
             const fileName: string = file.name
+
+
 
             //await writeFile(`${fileName}`, fileData)
         let path = DBProcess.saveAppData(fileName,fileData)
@@ -92,7 +95,9 @@ export default class DBProcess {
     }
 
     public static saveAppData(name:string,content:any) {
-        const appDataDirPath = DBProcess.getAppDataPath();
+        //const appDataDirPath = DBProcess.getAppDataPath();
+
+        const appDataDirPath: string =   electron.app.getPath('userData')
 
         // Create appDataDir if not exist
         if (!existsSync(appDataDirPath)) {
