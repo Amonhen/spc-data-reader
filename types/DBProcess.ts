@@ -10,7 +10,7 @@ export default class DBProcess {
     public static async process(file: File): Promise<Measurement> {
             const fileData: Uint8Array = new Uint8Array(Buffer.from(await file.arrayBuffer()));
             const fileName: string = file.name
-            await writeFile(`uploads/${fileName}`, fileData)
+            await writeFile(`${fileName}`, fileData)
             const db = await open({
                 filename: `uploads/${fileName}`,
                 driver: sqlite3.Database
