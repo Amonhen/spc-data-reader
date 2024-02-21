@@ -57,35 +57,34 @@ let chartData = computed<ChartData>(() => {
 async function onFileChanged(fileEvent: { fileList: UploadFileInfo[] }) {
   if (fileEvent.fileList.length) {
     let data = await DBProcess.process(fileEvent.fileList[0].file!)
-    console.log(data)
-    //let formData = new FormData
+   // let formData = new FormData
     //formData.set('file', fileEvent.fileList[0].file!)
-    //formData.set('fileName', fileEvent.fileList[0].file!.name)
-    //const { data } = await useFetch<Measurement>('/api/sql', { method: "POST", body: formData })
-    // if (data.value) {
-    //   data.value!.forEach((record,recordIndex:number) => {
-    //     recordIndex === 0 && (selection.channel = record.channel)
-    //     recordIndex === 0 && (selection.operation= record.operation)
-    //     Object.keys(record.data).forEach((machineName:string,machineIndex:number) => {
-    //       machineIndex === 0 && recordIndex === 0 && (selection.machine = machineName)
-    //       record.data[machineName].forEach((machineRecord,machineRecordIndex) => {
-    //         let time = moment(machineRecord.time)
-    //         if (recordIndex === 0 && machineIndex === 0 && machineRecordIndex === 0) {
-    //           selection.date[0] = machineRecord.time
-    //         }
-    //         tableData.value.push({
-    //           time: time,
-    //           channel: record.channel,
-    //           machine: machineName,
-    //           average: machineRecord.average,
-    //           max_value: machineRecord.max,
-    //           min_value: machineRecord.min,
-    //           operation: record.operation
-    //         })
-    //       })
-    //     })
-    //   })
-    // }
+   // formData.set('fileName', fileEvent.fileList[0].file!.name)
+   // const { data } = await useFetch<Measurement>('/api/sql', { method: "POST", body: formData })
+    if (data) {
+      data.forEach((record,recordIndex:number) => {
+        recordIndex === 0 && (selection.channel = record.channel)
+        recordIndex === 0 && (selection.operation= record.operation)
+        Object.keys(record.data).forEach((machineName:string,machineIndex:number) => {
+          machineIndex === 0 && recordIndex === 0 && (selection.machine = machineName)
+          record.data[machineName].forEach((machineRecord,machineRecordIndex) => {
+            let time = moment(machineRecord.time)
+            if (recordIndex === 0 && machineIndex === 0 && machineRecordIndex === 0) {
+              selection.date[0] = machineRecord.time
+            }
+            tableData.value.push({
+              time: time,
+              channel: record.channel,
+              machine: machineName,
+              average: machineRecord.average,
+              max_value: machineRecord.max,
+              min_value: machineRecord.min,
+              operation: record.operation
+            })
+          })
+        })
+      })
+    }
   } else {
     tableData.value = []
   }
