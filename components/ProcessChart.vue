@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { GChart } from 'vue-google-charts'
-
 interface ProcessData {
   title: string,
   values: number[]
@@ -52,13 +51,13 @@ const options = computed(()=>{
     height: "750",
     vAxis: {
       viewWindow: {
-        min: 0,
-        max: props.maxValue?.value ?? 1000,
+        min: (props.minValue ? props.minValue.value - 0.2 : undefined) ?? 0,
+        max: (props.maxValue ? props.maxValue.value + 0.2 : undefined) ?? 1000,
       },
     },
     hAxis: {
       viewWindow: {
-        min: 0,
+        min: 1,
         max: columnLength.value,
       },
     },

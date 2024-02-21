@@ -1,95 +1,118 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-let dbData = ref([])
-import {NUpload,NButton} from 'naive-ui'
-import FButton from "~/components/FButton.vue"
+import {NUpload,NSelect,NDatePicker} from 'naive-ui'
 import type {UploadInst,UploadFileInfo} from 'naive-ui'
-import ProccessControlChart from "~/components/ProccessControlChart.vue";
-import { type Data as ChartData} from "~/components/ProccessControlChart.vue"
-import ProccessChart from "~/components/ProccessChart.vue";
-let columns = ref<{ field: string, label: string }[]>([
-  { field: "time", label: "Date" },
-  { field: "header", label: "Header" },
-  { field: "valueMin", label: "Min" },
-  { field: "valueMax", label: "Max" }
-])
+import type {ChartData, Measurement, TableData} from "~/types/interfaces"
+
+
+let tableData = ref<TableData[]>([])
 const uploadElement = ref<UploadInst | null>(null)
-async function handleChange (fileEvent: { fileList: UploadFileInfo[] }) {
-   if (fileEvent.fileList.length) {
-     let formData = new FormData
-     formData.set('file', fileEvent.fileList[0].file!)
-     formData.set('fileName', fileEvent.fileList[0].file!.name)
-     const {data} = await useFetch('/api/sql', { method: "POST", body: formData })
-     let ttt: { time: number|Date|string }[] = data.value as any[]
-     ttt = ttt.map((dt) => {
-       dt.time = new Date((dt.time as number) * 1000)
-       dt.time = (dt.time as Date).toLocaleString()
-       return dt
-     })
-     // @ts-ignore
-     dbData.value = ttt
-   } else {
-     dbData.value = []
-   }
-}
 const tabItems = ref<{label:string,content:string}[]>([
   { label: "Table", content: "" },
-  { label: "Chart", content: "2" }
+  { label: "Chart", content: "" }
 ])
-// let chartData = ref<ChartData[]>([
-//   { x: 1, value: 14 },
-//   { x: 2, value: 11 },
-//   { x: 3, value: 12 },
-//   { x: 4, value: 14 },
-//   { x: 5, value: 11 },
-//   { x: 6, value: 11 },
-//   { x: 7, value: 12 },
-//   { x: 8, value: 12 },
-//   { x: 9, value: 13 },
-//   { x: 10, value: 15 },
-//   { x: 11, value: 19 },
-//   { x: 12, value: 21 },
-//   { x: 13, value: 22 },
-//   { x: 14, value: 20 },
-//   { x: 15, value: 18 },
-//   { x: 16, value: 14 },
-//   { x: 17, value: 16 },
-//   { x: 18, value: 18 },
-//   { x: 19, value: 17 },
-//   { x: 20, value: 15 },
-//   { x: 21, value: 12 },
-//   { x: 22, value: 8 },
-//   { x: 23, value: 11 }
-// ])
+let columns = ref<{ field: string, label: string }[]>([
+  { field: "time", label: "Date" },
+  { field: "channel", label: "Channel" },
+  { field: "machine", label: "Machine" },
+  { field: "average", label: "Average" },
+])
+
+let selection = reactive({
+  machine: "",
+  channel: "",
+  date: [1183135260000, Date.now()] as number[],
+  operation: ""
+})
+
+function removeDuplicates(arr): string[] {
+  let unique = arr.reduce(function (acc, curr) {
+    if (!acc.includes(curr))
+      acc.push(curr);
+    return acc;
+  }, []);
+  return unique;
+}
+
+let chartData = computed<ChartData>(() => {
+    let selectedMachineAverages = tableData.value.filter(data=>data.machine===selection.machine).map(data=>data.average)
+    let maxValue = tableData.value.filter(data=>data.machine===selection.machine).map(data=>data.max_value)
+    let minValue = tableData.value.filter(data=>data.machine===selection.machine).map(data=>data.min_value)
+    // console.log(selectedMachineAverages.map((_,index)=>index))
+  return {
+        title: selection.machine + " measurement data",
+        data: {
+          title: selection.machine,
+          values: selectedMachineAverages
+        },
+        vData: { title: 'Average', values: [40,50,60] },
+        hData: { title: 'Records', values: selectedMachineAverages.map((_,index)=>index+1) },
+        min_value: { title: "Minimal", value: minValue[0] },
+        max_value: { title: "Maximum", value: maxValue[0] }
+      }
+})
+
+async function onFileChanged(fileEvent: { fileList: UploadFileInfo[] }) {
+  if (fileEvent.fileList.length) {
+    let formData = new FormData
+    formData.set('file', fileEvent.fileList[0].file!)
+    formData.set('fileName', fileEvent.fileList[0].file!.name)
+    const { data } = await useFetch<Measurement>('/api/sql', { method: "POST", body: formData })
+    if (data.value) {
+      data.value!.forEach((record,recordIndex:number) => {
+        recordIndex === 0 && (selection.channel = record.channel)
+        recordIndex === 0 && (selection.operation= record.operation)
+        Object.keys(record.data).forEach((machineName:string,machineIndex:number) => {
+          machineIndex === 0 && (selection.machine = machineName)
+          record.data[machineName].forEach((machineRecord) => {
+            tableData.value.push({
+              time: machineRecord.time,
+              channel: record.channel,
+              machine: machineName,
+              average: machineRecord.average,
+              max_value: machineRecord.max,
+              min_value: machineRecord.min,
+              operation: record.operation
+            })
+          })
+        })
+      })
+    }
+  } else {
+    tableData.value = []
+  }
+}
 </script>
 
 <template>
   <div id="index-page">
     <FButton @click="uploadElement?.openOpenFileDialog()">Select File</FButton>
-    <NUpload ref="uploadElement" accept=".db" :default-upload="false" @change="handleChange" :max="1" />
-        <FTabs :items="tabItems">
-          <template #item="{item}">
-        <DetailsList v-if="dbData.length && item['label'] ==='Table'" :rows="dbData" :columns="columns" />
-            <ProccessChart
-                v-if="item['label'] === 'Chart'"
-                :data="[
-                    {title: '111', values: [110,120,200,300,150]},
-                    //{title: '222', values: [120,200,100,300]}
-                    ]"
-                :title="'Test'"
-                :curved-lines="true"
-                :h-data="{title: 'H', values: ['100','100','100','100','100']}"
-                :v-data="{title: 'V', values: ['200','200','200','200','200']}"
-                :max-value="{title: 'Max V', value: 500}"
-                :min-value="{title: 'Min V', value: 50}"
-            />
+    <NUpload ref="uploadElement" accept=".db" :default-upload="false" @change="onFileChanged" :max="1" />
+    <FTabs :items="tabItems">
+      <template #item="{item}">
+        <DetailsList v-if="tableData.length && item['label'] ==='Table'" :rows="tableData" :columns="columns" />
+        <div style="display: flex;justify-content: space-between">
+          <NSelect style="width: 24%;display: inline-block" v-if="tableData.length && item['label'] ==='Chart'" v-model:value="selection.machine" :options="removeDuplicates(tableData.map(d=>d.machine)).map(s=>{return{label:s,value:s}})" />
+          <NSelect style="width: 24%;display: inline-block" v-if="tableData.length && item['label'] ==='Chart'" v-model:value="selection.channel" :options="removeDuplicates(tableData.map(d=>d.channel)).map(s=>{return{label:s,value:s}})" />
+          <NSelect style="width: 24%;display: inline-block" v-if="tableData.length && item['label'] ==='Chart'" v-model:value="selection.operation" :options="removeDuplicates(tableData.map(d=>d.operation)).map(s=>{return{label:s,value:s}})" />
+          <NDatePicker style="width: 24%;display: inline-block" v-if="tableData.length && item['label'] ==='Chart'" v-model:value="selection.date" type="daterange" clearable />
+        </div>
+        <ProcessChart
+            v-if="tableData.length && item['label'] === 'Chart'"
+            :data="[chartData.data]"
+            :title="chartData.title"
+            :h-data="chartData.hData"
+            :v-data="chartData.vData"
+            :max-value="chartData.max_value"
+            :min-value="chartData.min_value"
+        />
       </template>
     </FTabs>
   </div>
 </template>
 
 <style scoped lang="scss">
-  #index-page {
-    padding: 20px;
-  }
+#index-page {
+  padding: 20px;
+}
 </style>
