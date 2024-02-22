@@ -30,6 +30,8 @@ const props = defineProps<{
 <style scoped lang="scss">
   table {
     width: 100%;
+    margin: 20px 0;
+    background: white;
     tbody {
       tr {
         height: 43px;

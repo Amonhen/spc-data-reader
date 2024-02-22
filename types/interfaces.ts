@@ -40,6 +40,7 @@ export interface MeasureRecord {
 
 export interface TableData {
     time: moment.Moment
+    product: string
     channel: string
     machine: string
     average: number

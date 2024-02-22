@@ -39,7 +39,8 @@ const chartData = computed(() => {
     props.maxValue && column.push(props.maxValue.value)
     _data.push(column)
   }
-  return _data
+  console.log(_data)
+  return _data.length < 2 ? [] : _data
 })
 
 const options = computed(()=>{

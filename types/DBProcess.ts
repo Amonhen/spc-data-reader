@@ -1,5 +1,4 @@
 import {Buffer} from "node:buffer";
-// import {writeFile} from "node:fs/promises";
 import {mkdirSync,existsSync,writeFile} from "node:fs";
 import {open} from "sqlite";
 import sqlite3 from "sqlite3";
@@ -13,8 +12,6 @@ export default class DBProcess {
     public static async process(file: File): Promise<Measurement> {
             const fileData: Uint8Array = new Uint8Array(Buffer.from(await file.arrayBuffer()));
             const fileName: string = file.name
-
-
 
             //await writeFile(`${fileName}`, fileData)
         let path = await DBProcess.saveAppData(fileName,fileData)
